@@ -1,5 +1,12 @@
 package message
 
+import (
+	"bytes"
+	"encoding/binary"
+	"math"
+	"math/rand"
+)
+
 type OPCODE byte
 
 const (
@@ -55,7 +62,7 @@ type Header struct {
 	// 1               - an inverse query (IQUERY)
 	// 2               - a server status request (STATUS)
 	// 3 to 15         - reserved for future use
-	OPCODE OPCODE
+	OPCode OPCODE
 
 	// Authoritative Answer - this bit is valid in responses,
 	// and specifies that the responding name server is an
@@ -71,6 +78,10 @@ type Header struct {
 	// Recursion Desired - If set, it directs the name server to
 	// pursue the query recursively
 	RD byte
+
+	// Recursion Available - this is set or cleared in a response,
+	// and denotes whether recursive query support is available
+	RA byte
 
 	// Reserved for future use
 	Z byte
@@ -98,7 +109,7 @@ type Header struct {
 	//                 information to the particular requester,
 	//                 or a name server may not wish to perform
 	//                 a particular operation (e.g., zone
-	RC RCODE
+	RCode RCODE
 
 	// An unsigned 16 bit integer specifying the number of entries
 	// int the question section.
@@ -112,7 +123,37 @@ type Header struct {
 	// server resource records in the authroity records section.
 	NSCOUNT uint16
 
-	// An unsigned 16 biy integer specifying the number of resource
+	// An unsigned 16 bit integer specifying the number of resource
 	// records in the additional records section.
 	ARCOUNT uint16
+}
+
+func (h *Header) Marshall() ([]byte, error) {
+	var b bytes.Buffer
+	var h1 byte
+	var h2 byte
+
+	h1 |= h.QR << 7
+	h1 |= byte(h.OPCode) << 3
+	h1 |= h.AA << 2
+	h1 |= h.TC << 1
+	h1 |= h.RD
+
+	h2 |= h.RA << 7
+	h2 |= h.Z << 4
+	h2 |= byte(h.RCode)
+
+	binary.Write(&b, binary.BigEndian, h.ID)
+	binary.Write(&b, binary.BigEndian, h1)
+	binary.Write(&b, binary.BigEndian, h2)
+	binary.Write(&b, binary.BigEndian, h.QDCOUNT)
+	binary.Write(&b, binary.BigEndian, h.ANCOUNT)
+	binary.Write(&b, binary.BigEndian, h.NSCOUNT)
+	binary.Write(&b, binary.BigEndian, h.ARCOUNT)
+
+	return b.Bytes(), nil
+}
+
+func NewHeaderID() uint16 {
+	return uint16(rand.Intn(math.MaxUint16 + 1))
 }
