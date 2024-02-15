@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"math"
 	"math/rand"
 )
@@ -152,6 +153,35 @@ func (h *Header) Marshall() ([]byte, error) {
 	binary.Write(&b, binary.BigEndian, h.ARCOUNT)
 
 	return b.Bytes(), nil
+}
+
+func (h *Header) Unmarshall(b []byte) error {
+	if len(b) != 12 {
+		return errors.New("Incorrect length byte slice. Expected 12")
+	}
+
+	h.ID = binary.BigEndian.Uint16(b[:2])
+
+	h1 := b[2]
+
+	h.QR = (h1 >> 7) & 1
+	h.OPCode = OPCODE((h1 >> 3) & 15)
+	h.AA = (h1 >> 2) & 1
+	h.TC = (h1 >> 1) & 1
+	h.RD = h1 & 1
+
+	h2 := b[3]
+
+	h.RA = (h2 >> 7) & 1
+	h.Z = (h2 >> 4) & 7
+	h.RCode = RCODE(h2 & 15)
+
+	h.QDCOUNT = binary.BigEndian.Uint16(b[4:6])
+	h.ANCOUNT = binary.BigEndian.Uint16(b[6:8])
+	h.NSCOUNT = binary.BigEndian.Uint16(b[8:10])
+	h.ARCOUNT = binary.BigEndian.Uint16(b[10:12])
+
+	return nil
 }
 
 func NewHeaderID() uint16 {
