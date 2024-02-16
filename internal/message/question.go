@@ -1,6 +1,10 @@
 package message
 
-import "strings"
+import (
+	"bytes"
+	"encoding/binary"
+	"strings"
+)
 
 type QTYPE uint16
 
@@ -77,6 +81,16 @@ type Question struct {
 	// HS              4 Hesiod [Dyer 87]
 	// *               255 any class
 	QClass QCLASS
+}
+
+func (q *Question) Marshall() []byte {
+	var b bytes.Buffer
+
+	binary.Write(&b, binary.BigEndian, q.QName)
+	binary.Write(&b, binary.BigEndian, q.QType)
+	binary.Write(&b, binary.BigEndian, q.QClass)
+
+	return b.Bytes()
 }
 
 func ConvertHostnameToQName(hostname string) []byte {
