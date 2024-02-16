@@ -79,7 +79,7 @@ type Question struct {
 	QClass QCLASS
 }
 
-func CovertHostnameToQName(hostname string) []byte {
+func ConvertHostnameToQName(hostname string) []byte {
 	var b []byte
 	labels := strings.Split(hostname, ".")
 
@@ -91,6 +91,8 @@ func CovertHostnameToQName(hostname string) []byte {
 			b = append(b, lb)
 		}
 	}
+
+	b = append(b, byte(0))
 
 	return b
 }
