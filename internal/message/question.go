@@ -1,5 +1,7 @@
 package message
 
+import "strings"
+
 type QTYPE uint16
 
 const (
@@ -75,4 +77,20 @@ type Question struct {
 	// HS              4 Hesiod [Dyer 87]
 	// *               255 any class
 	QClass QCLASS
+}
+
+func CovertHostnameToQName(hostname string) []byte {
+	var b []byte
+	labels := strings.Split(hostname, ".")
+
+	for _, label := range labels {
+		lbs := []byte(label)
+		length := len(lbs)
+		b = append(b, byte(length))
+		for _, lb := range lbs {
+			b = append(b, lb)
+		}
+	}
+
+	return b
 }
