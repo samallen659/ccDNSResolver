@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"strings"
 )
 
@@ -115,6 +116,25 @@ func (q *Question) Marshall() []byte {
 	binary.Write(&b, binary.BigEndian, q.QClass)
 
 	return b.Bytes()
+}
+
+func (q *Question) Unmarshall(b []byte) error {
+	l := len(b)
+	for i := 0; i < l; i++ {
+		if b[i] == byte(0) {
+			q.QName = b[:i+1]
+			break
+		}
+
+		if i == l {
+			return errors.New("Byte slice did not contain zero byte for the null label of the root")
+		}
+	}
+
+	q.QType = QTYPE(binary.BigEndian.Uint16(b[l-4 : l-2]))
+	q.QClass = QCLASS(binary.BigEndian.Uint16(b[l-2:]))
+
+	return nil
 }
 
 func ConvertHostnameToQName(hostname string) []byte {
