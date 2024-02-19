@@ -1,15 +1,15 @@
 package message
 
+import "bytes"
+
 type Message struct {
-	header   Header
-	question Question
+	Header   Header
+	Question Question
 }
 
 func (m *Message) Marshall() []byte {
-	hBytes, _ := m.header.Marshall()
-	qBytes := m.question.Marshall()
-	var b []byte
-	b = append(b, hBytes...)
-	b = append(b, qBytes...)
-	return b
+	var b bytes.Buffer
+	b.Write(m.Header.Marshall())
+	b.Write(m.Question.Marshall())
+	return b.Bytes()
 }
