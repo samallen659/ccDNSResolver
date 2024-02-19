@@ -129,7 +129,7 @@ type Header struct {
 	ARCOUNT uint16
 }
 
-func (h *Header) Marshall() ([]byte, error) {
+func (h *Header) Marshall() []byte {
 	var b bytes.Buffer
 	var h1 byte
 	var h2 byte
@@ -152,7 +152,7 @@ func (h *Header) Marshall() ([]byte, error) {
 	binary.Write(&b, binary.BigEndian, h.NSCOUNT)
 	binary.Write(&b, binary.BigEndian, h.ARCOUNT)
 
-	return b.Bytes(), nil
+	return b.Bytes()
 }
 
 func (h *Header) Unmarshall(b []byte) error {

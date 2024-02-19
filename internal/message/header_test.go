@@ -26,10 +26,7 @@ func TestHeader(t *testing.T) {
 			ARCOUNT: uint16(0),
 		}
 
-		b, err := h.Marshall()
-		if err != nil {
-			t.Fatalf("Marshall failed: %s", err.Error())
-		}
+		b := h.Marshall()
 
 		expectedHex := fmt.Sprintf("%x13600001000000010000", id)
 		encodedString := hex.EncodeToString(b)
