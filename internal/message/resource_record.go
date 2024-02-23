@@ -23,3 +23,7 @@ type ResourceRecord struct {
 	// fields
 	RData []byte
 }
+
+func ParseResourceRecords(b []byte) ([]ResourceRecord, error) {
+	return nil, nil
+}
