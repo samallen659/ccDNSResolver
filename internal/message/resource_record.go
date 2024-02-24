@@ -1,5 +1,11 @@
 package message
 
+import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
+)
+
 type TYPE uint16
 
 const (
@@ -32,8 +38,7 @@ const (
 
 type ResourceRecord struct {
 	// The domain name this resorce record pertains
-	Name []byte
-
+	Name string
 	// Contains one of the RR type codes. This field
 	// specifies the meaning of the data in RData
 	Type uint16
@@ -54,6 +59,43 @@ type ResourceRecord struct {
 	RData []byte
 }
 
-func ParseResourceRecords(b []byte) ([]ResourceRecord, error) {
+// Takes in a pointer to a full DNS response in b, and an
+// int s that denotes the starting byte of the resource records and c that denotes
+// the number of resource records in the response. If formatted correctly returns
+// a slice of parsed resource records, otherwise returns an error
+func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
+	// var rrs []*ResourceRecord
+	pos := s
+
+	for i := 0; i < c; i++ {
+		// var rr ResourceRecord
+		name, _ := parseResourceRecordName(b, pos)
+		fmt.Println(name)
+
+	}
 	return nil, nil
+}
+
+// Takes in a pointer to a full DNS response in b, and an int s that denotes
+// the starting byte of the resource record. Parses the name into the label
+// format used in the question checking for compression. Returns the byte slice
+// of the name and an int for the offset in the position that should now be checked
+// in the message
+func parseResourceRecordName(b *[]byte, s int) ([]byte, int) {
+	var n bytes.Buffer
+	// if a pointer
+	if (*b)[s]&192 == 192 {
+		// pulls pointer value while remove pointer flag bits
+		ps := uint16(49152) ^ binary.BigEndian.Uint16((*b)[s:s+2])
+		pn := 0
+		for i := int(ps); i < len((*b)); i++ {
+			if (*b)[i] == byte(0) {
+				pn = i
+				break
+			}
+		}
+		n.Write((*b)[ps : pn+1])
+
+	}
+	return n.Bytes(), 1
 }
