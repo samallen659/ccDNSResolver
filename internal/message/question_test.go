@@ -12,8 +12,18 @@ func TestQuestion(t *testing.T) {
 		b := message.ConvertHostnameToQName(hostname)
 
 		if a := slices.Compare(b, []byte{3, 119, 119, 119, 6, 103, 111, 111, 103, 108, 101, 3, 99, 111, 109, 0}); a != 0 {
-			t.Error("incorret byte slice received")
+			t.Error("incorrect byte slice received")
 		}
+	})
+	t.Run("ConvertQNameToHostname returns correct string", func(t *testing.T) {
+		b := []byte{3, 119, 119, 119, 6, 103, 111, 111, 103, 108, 101, 3, 99, 111, 109, 0}
+		e := "www.google.com"
+		s := message.ConvertQNameToHostname(b)
+
+		if s != e {
+			t.Errorf("incorrect string received, expected: %s, received: %s", e, s)
+		}
+
 	})
 	t.Run("Marshall returns correct byte slice of question", func(t *testing.T) {
 		qname := message.ConvertHostnameToQName("www.google.com")

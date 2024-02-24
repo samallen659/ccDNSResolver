@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -153,4 +154,23 @@ func ConvertHostnameToQName(hostname string) []byte {
 	b = append(b, byte(0))
 
 	return b
+}
+
+func ConvertQNameToHostname(q []byte) string {
+	var name string
+
+	i := 0
+	for i < len(q) {
+		c := int(q[i])
+		for j := i + 1; j < i+c+1; j++ {
+			name = fmt.Sprintf("%s%s", name, string(q[j]))
+		}
+		i += c + 1
+
+		if i < len(q)-2 {
+			name = fmt.Sprintf("%s%s", name, ".")
+		}
+	}
+
+	return name
 }
