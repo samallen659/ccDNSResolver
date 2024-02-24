@@ -3,7 +3,6 @@ package message
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 )
 
 type TYPE uint16
@@ -64,18 +63,32 @@ type ResourceRecord struct {
 // the number of resource records in the response. If formatted correctly returns
 // a slice of parsed resource records, otherwise returns an error
 func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
-	// var rrs []*ResourceRecord
+	var rrs []*ResourceRecord
 	pos := s
 
 	for i := 0; i < c; i++ {
-		// var rr ResourceRecord
-		name, _, err := parseResourceRecordName(b, pos)
+		var rr ResourceRecord
+		name, offset, err := parseResourceRecordName(b, pos)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(name)
+		rr.Name = name
+		pos += offset
 
+		rr.Type = binary.BigEndian.Uint16((*b)[pos : pos+2])
+		pos += 2
+
+		rr.Class = binary.BigEndian.Uint16((*b)[pos : pos+2])
+		pos += 2
+
+		rr.TTL = binary.BigEndian.Uint32((*b)[pos : pos+4])
+		pos += 4
+
+		rr.RDLength = binary.BigEndian.Uint16((*b)[pos : pos+2])
+		pos += 2
+		rrs = append(rrs, &rr)
 	}
+
 	return nil, nil
 }
 
