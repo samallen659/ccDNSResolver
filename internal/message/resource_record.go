@@ -88,6 +88,7 @@ func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
 		pos += 2
 
 		rr.RData = (*b)[pos : pos+int(rr.RDLength)]
+		pos += int(rr.RDLength)
 		rrs = append(rrs, &rr)
 	}
 
