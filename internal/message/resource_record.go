@@ -103,9 +103,11 @@ func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
 func parseResourceRecordName(b *[]byte, s int) (string, int, error) {
 	var n bytes.Buffer
 	var offset int
+	pointer := false
 	for (*b)[s+offset] != 0 {
 		// if a pointer
 		if (*b)[s+offset]&192 == 192 {
+			pointer = true
 			// pulls pointer value while remove pointer flag bits
 			ps := uint16(49152) ^ binary.BigEndian.Uint16((*b)[s+offset:s+offset+2])
 			pn := 0
@@ -124,6 +126,11 @@ func parseResourceRecordName(b *[]byte, s int) (string, int, error) {
 		c := int((*b)[s+offset])
 		n.Write((*b)[s+offset : s+offset+c+1])
 		offset += c + 1
+	}
+
+	//to account for zero byte in a label format
+	if !pointer {
+		offset++
 	}
 
 	name := ConvertQNameToHostname(n.Bytes())
