@@ -40,10 +40,10 @@ type ResourceRecord struct {
 	Name string
 	// Contains one of the RR type codes. This field
 	// specifies the meaning of the data in RData
-	Type uint16
+	Type TYPE
 
 	// Specifies the class of the data in RData
-	Class uint16
+	Class CLASS
 
 	// Specifies the time interval (in seconds) that the
 	// resource record may be cached before it should be
@@ -75,10 +75,10 @@ func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
 		rr.Name = name
 		pos += offset
 
-		rr.Type = binary.BigEndian.Uint16((*b)[pos : pos+2])
+		rr.Type = TYPE(binary.BigEndian.Uint16((*b)[pos : pos+2]))
 		pos += 2
 
-		rr.Class = binary.BigEndian.Uint16((*b)[pos : pos+2])
+		rr.Class = CLASS(binary.BigEndian.Uint16((*b)[pos : pos+2]))
 		pos += 2
 
 		rr.TTL = binary.BigEndian.Uint32((*b)[pos : pos+4])
@@ -86,10 +86,12 @@ func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
 
 		rr.RDLength = binary.BigEndian.Uint16((*b)[pos : pos+2])
 		pos += 2
+
+		rr.RData = (*b)[pos : pos+int(rr.RDLength)]
 		rrs = append(rrs, &rr)
 	}
 
-	return nil, nil
+	return rrs, nil
 }
 
 // Takes in a pointer to a full DNS response in b, and an int s that denotes
