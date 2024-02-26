@@ -25,7 +25,7 @@ func NewClient(addr string) (*Client, error) {
 	return &Client{addr: udpAddr}, nil
 }
 
-func (c *Client) Resolve(hostname string) error {
+func (c *Client) Resolve(hostname string) (*message.Message, error) {
 
 	id := message.NewHeaderID()
 	m := message.Message{
@@ -43,31 +43,29 @@ func (c *Client) Resolve(hostname string) error {
 		}}
 
 	mBytes := m.Marshall()
-	fmt.Println(mBytes)
 
-	fmt.Println("setting up connection")
 	conn, err := net.DialUDP("udp", nil, c.addr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer conn.Close()
 	conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 
 	_, err = conn.Write(mBytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	buf := make([]byte, 1024)
 	_, err = conn.Read(buf)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	mResp := message.Message{}
 	if err := mResp.Unmarshall(buf); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &mResp, nil
 }
