@@ -64,7 +64,10 @@ func (c *Client) Resolve(hostname string) error {
 		return err
 	}
 
-	fmt.Println(buf)
+	mResp := message.Message{}
+	if err := mResp.Unmarshall(buf); err != nil {
+		return err
+	}
 
 	return nil
 }

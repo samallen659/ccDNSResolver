@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 type TYPE uint16
@@ -64,6 +65,7 @@ type ResourceRecord struct {
 // a slice of parsed resource records, otherwise returns an error
 func ParseResourceRecords(b *[]byte, s int, c int) ([]*ResourceRecord, error) {
 	var rrs []*ResourceRecord
+	fmt.Println((*b)[s : s+10])
 	pos := s
 
 	for i := 0; i < c; i++ {
