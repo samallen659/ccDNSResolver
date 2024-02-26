@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"fmt"
 )
 
 type Message struct {
@@ -47,4 +48,17 @@ func (m *Message) Unmarshall(b []byte) error {
 	m.ResourceRecords = rrs
 
 	return nil
+}
+
+func (m *Message) Print() {
+	for _, rr := range m.ResourceRecords {
+		var ip string
+		for i, b := range rr.RData {
+			ip = fmt.Sprintf("%s%d", ip, b)
+			if i != 3 {
+				ip = fmt.Sprintf("%s.", ip)
+			}
+		}
+		fmt.Printf("%s : %s\n", rr.Name, ip)
+	}
 }
